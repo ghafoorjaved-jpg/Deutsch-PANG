@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="description" content="Deutsch Pang — learn German A1 to C2 by popping balloons with the right word." />
+<meta name="theme-color" content="#0e1624" />
+<link rel="manifest" href="manifest.json" />
+<link rel="icon" href="icons/icon-192.png" />
+<link rel="apple-touch-icon" href="icons/icon-192.png" />
+<title>Deutsch Pang — A1 to C2</title>
+<style>
+  :root {
+    --bg: #0e1624;
+    --panel: #152238;
+    --line: #2a4060;
+    --gold: #ffd54a;
+    --mint: #3dd68c;
+    --rose: #ff6b7a;
+    --sky: #5ec8ff;
+    --ink: #e8f0fa;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    height: 100%; background: var(--bg); color: var(--ink);
+    font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+    overflow: hidden; touch-action: none; user-select: none;
+  }
+  #app { height: 100%; display: flex; flex-direction: column; }
+  header.appbar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 14px; background: #101c30; border-bottom: 1px solid var(--line);
+    gap: 10px; flex-wrap: wrap;
+  }
+  .brand { font-weight: 800; letter-spacing: .06em; color: var(--gold); font-size: 18px; }
+  .brand small { color: #9bb4d0; font-weight: 500; letter-spacing: 0; margin-left: 8px; }
+  .stats { display: flex; gap: 14px; font-size: 13px; align-items: center; }
+  .stats b { color: var(--gold); }
+  .chip { background: #1b2d48; border: 1px solid var(--line); padding: 4px 10px; border-radius: 999px; }
+  button.ghost, button.solid, .iconbtn {
+    border: 0; cursor: pointer; font-weight: 800; font-family: inherit;
+  }
+  button.solid {
+    background: var(--gold); color: #2a1a00; padding: 8px 14px; border-radius: 8px;
+  }
+  button.ghost {
+    background: #1b2d48; color: var(--ink); padding: 8px 14px; border-radius: 8px;
+    border: 1px solid var(--line);
+  }
+  .iconbtn { background: transparent; color: var(--ink); font-size: 16px; padding: 4px 8px; }
+
+  #screens { flex: 1; min-height: 0; position: relative; }
+  .screen { position: absolute; inset: 0; display: none; overflow: auto; }
+  .screen.on { display: block; }
+
+  /* HOME */
+  #home { padding: 16px 18px 28px; }
+  .row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px;
+  }
+  .card {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 12px;
+    padding: 14px; cursor: pointer; transition: .15s transform, .15s border-color;
+  }
+  .card:hover { transform: translateY(-2px); border-color: var(--gold); }
+  .card.lock { opacity: .45; cursor: not-allowed; }
+  .card h3 { font-size: 16px; margin-bottom: 4px; }
+  .card p { font-size: 13px; color: #9bb4d0; }
+  .bar { height: 7px; background: #0b1422; border-radius: 99px; margin-top: 10px; overflow: hidden; }
+  .bar > i { display: block; height: 100%; background: var(--mint); width: 0; }
+  .lvl-tag { font-size: 11px; font-weight: 800; color: var(--sky); letter-spacing: .08em; }
+
+  /* GAME */
+  #play { overflow: hidden; display: none; flex-direction: column; }
+  #play.on { display: flex; }
+  #promptbox {
+    background: #122036; border-bottom: 1px solid var(--line);
+    padding: 8px 14px; display: flex; justify-content: space-between; align-items: center; gap: 12px;
+  }
+  #prompt {
+    font-size: 26px; font-weight: 800;
+  }
+  #prompt .hint { display: block; font-size: 13px; font-weight: 500; color: #9bb4d0; }
+  canvas {
+    display: block; width: 100%; height: auto; max-height: calc(100vh - 168px);
+    background: #1a4a7a; cursor: none; flex: 1; image-rendering: auto;
+  }
+  #touchbar { display: none; gap: 8px; padding: 8px; background: #101c30; }
+  #touchbar button { flex: 1; padding: 14px; font-size: 16px; background: #1b2d48; color: #fff; border: 1px solid var(--line); border-radius: 8px; font-weight: 800; }
+  @media (pointer: coarse) { #touchbar { display: flex; } }
+
+  /* USERS / BOARD */
+  .wrap { max-width: 860px; margin: 0 auto; padding: 18px; }
+  .user {
+    display: flex; align-items: center; gap: 12px; background: var(--panel);
+    border: 1px solid var(--line); border-radius: 12px; padding: 12px; margin-bottom: 10px; cursor: pointer;
+  }
+  .avatar {
+    width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center;
+    font-weight: 800; color: #1a1200;
+  }
+  .user .meta { flex: 1; }
+  .user .meta small { color: #9bb4d0; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { text-align: left; padding: 10px 8px; border-bottom: 1px solid var(--line); }
+  th { color: #9bb4d0; font-size: 12px; letter-spacing: .06em; }
+
+  .modal {
+    position: fixed; inset: 0; background: rgba(6,10,20,.72); display: none;
+    align-items: center; justify-content: center; z-index: 20; padding: 16px;
+  }
+  .modal.on { display: flex; }
+  .panel {
+    width: min(440px, 100%); background: linear-gradient(180deg, #1e3a5f, #12233c);
+    border: 3px solid var(--gold); border-radius: 12px; padding: 24px; text-align: center;
+  }
+  .panel h1 { color: var(--gold); margin-bottom: 8px; }
+  .panel p { color: #d5e4f5; margin: 8px 0 16px; line-height: 1.45; }
+  input[type=text] {
+    width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--line);
+    background: #0b1422; color: #fff; font-size: 16px; margin-bottom: 12px;
+  }
+  .ok { color: var(--mint); }
+  .bad { color: var(--rose); }
+</style>
+</head>
+<body>
+<div id="app">
+  <header class="appbar">
+    <div class="brand">DEUTSCH PANG <small>A1 → C2</small></div>
+    <div class="stats">
+      <span class="chip">👤 <b id="who">Guest</b></span>
+      <span class="chip">⚡ <b id="xp">0</b> XP</span>
+      <span class="chip">🔥 <b id="streak">0</b></span>
+      <span class="chip">❤️ <b id="lives">5</b></span>
+    </div>
+    <div>
+      <button class="ghost" data-go="home">Path</button>
+      <button class="ghost" data-go="board">League</button>
+      <button class="ghost" data-go="users">Players</button>
+    </div>
+  </header>
+
+  <div id="screens">
+    <section id="home" class="screen on"></section>
+
+    <section id="play" class="screen">
+      <div id="promptbox">
+        <div id="prompt">Get ready</div>
+        <div>
+          <span class="chip">Unit XP <b id="uxp">0</b></span>
+          <button class="ghost" id="quitBtn">Quit</button>
+        </div>
+      </div>
+      <canvas id="game" width="720" height="480"></canvas>
+      <div id="touchbar">
+        <button id="btnL">◀</button>
+        <button id="btnF">FIRE</button>
+        <button id="btnR">▶</button>
+      </div>
+    </section>
+
+    <section id="board" class="screen">
+      <div class="wrap">
+        <div class="row"><h2>League board</h2><button class="ghost" id="exportBtn">Export / import progress</button></div>
+        <p style="color:#9bb4d0;margin-bottom:14px">Everyone who plays on this device shares this board — like a small Duolingo classroom.</p>
+        <table>
+          <thead><tr><th>#</th><th>Player</th><th>XP</th><th>Level</th><th>Units</th><th>Streak</th><th>Accuracy</th></tr></thead>
+          <tbody id="boardBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="users" class="screen">
+      <div class="wrap">
+        <div class="row"><h2>Players</h2><button class="solid" id="addUser">New player</button></div>
+        <p style="color:#9bb4d0;margin-bottom:14px">Each player has their own path, XP and streak. Switch profiles anytime.</p>
+        <div id="userList"></div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<div class="modal" id="modal"></div>
+
+<script>
+/* ========== German curriculum A1–C2 ========== */
+const UNITS = [
+  { id:"a1-1", cefr:"A1", title:"Greetings", sub:"Hallo, Guten Tag, Tschüss",
+    items:[
+      {q:"Hello", a:"Hallo", d:["Tschüss","Bitte","Danke"]},
+      {q:"Good day", a:"Guten Tag", d:["Gute Nacht","Guten Appetit","Willkommen"]},
+      {q:"Good morning", a:"Guten Morgen", d:["Guten Abend","Gute Reise","Auf Wiedersehen"]},
+      {q:"Good evening", a:"Guten Abend", d:["Guten Morgen","Hallo","Bitte schön"]},
+      {q:"Goodbye (formal)", a:"Auf Wiedersehen", d:["Tschüss","Ciao","Bis bald"]},
+      {q:"Bye (informal)", a:"Tschüss", d:["Bitte","Danke","Gern"]},
+      {q:"Please", a:"Bitte", d:["Danke","Gern geschehen","Entschuldigung"]},
+      {q:"Thank you", a:"Danke", d:["Bitte","Hallo","Ja"]},
+      {q:"Yes", a:"Ja", d:["Nein","Doch","Vielleicht"]},
+      {q:"No", a:"Nein", d:["Ja","Bitte","Oder"]},
+    ]},
+  { id:"a1-2", cefr:"A1", title:"People & pronouns", sub:"ich, du, er, sie, wir",
+    items:[
+      {q:"I", a:"ich", d:["du","er","wir"]},
+      {q:"you (informal singular)", a:"du", d:["Sie","ihr","wir"]},
+      {q:"he", a:"er", d:["sie","es","ihr"]},
+      {q:"she", a:"sie", d:["er","es","du"]},
+      {q:"we", a:"wir", d:["ihr","sie","uns"]},
+      {q:"you (plural informal)", a:"ihr", d:["du","Sie","wir"]},
+      {q:"you (formal)", a:"Sie", d:["du","ihr","er"]},
+      {q:"the man", a:"der Mann", d:["die Frau","das Kind","die Leute"]},
+      {q:"the woman", a:"die Frau", d:["der Mann","das Mädchen","der Junge"]},
+      {q:"the child", a:"das Kind", d:["der Vater","die Mutter","der Sohn"]},
+    ]},
+  { id:"a1-3", cefr:"A1", title:"Articles & gender", sub:"der, die, das",
+    items:[
+      {q:"the house (with article)", a:"das Haus", d:["der Haus","die Haus","den Haus"]},
+      {q:"the table", a:"der Tisch", d:["die Tisch","das Tisch","dem Tisch"]},
+      {q:"the lamp", a:"die Lampe", d:["der Lampe","das Lampe","den Lampe"]},
+      {q:"the book", a:"das Buch", d:["der Buch","die Buch","den Buch"]},
+      {q:"the apple", a:"der Apfel", d:["die Apfel","das Apfel","den Äpfel"]},
+      {q:"the street", a:"die Straße", d:["der Straße","das Straße","dem Straße"]},
+      {q:"a man", a:"ein Mann", d:["eine Mann","einen Frau","ein Frau"]},
+      {q:"a woman", a:"eine Frau", d:["ein Frau","einen Frau","einer Frau"]},
+      {q:"a child", a:"ein Kind", d:["eine Kind","einen Kind","einer Kind"]},
+      {q:"the city", a:"die Stadt", d:["der Stadt","das Stadt","den Stadt"]},
+    ]},
+  { id:"a1-4", cefr:"A1", title:"Numbers & time", sub:"eins bis zwanzig, Uhr",
+    items:[
+      {q:"one", a:"eins", d:["ein","einser","erste"]},
+      {q:"two", a:"zwei", d:["zwo","zweite","zwölf"]},
+      {q:"three", a:"drei", d:["dreißig","vier","tre"]},
+      {q:"ten", a:"zehn", d:["zehnte","zwanzig","zehnens"]},
+      {q:"twelve", a:"zwölf", d:["zwei","zwanzig","elf"]},
+      {q:"twenty", a:"zwanzig", d:["zwölf","dreißig","zehn"]},
+      {q:"What time is it?", a:"Wie spät ist es?", d:["Wie alt bist du?","Wo bist du?","Was machst du?"]},
+      {q:"o'clock", a:"Uhr", d:["Stunde","Zeit","Tag"]},
+      {q:"today", a:"heute", d:["gestern","morgen","jetzt"]},
+      {q:"tomorrow", a:"morgen", d:["heute","gestern","Abend"]},
+    ]},
+  { id:"a1-5", cefr:"A1", title:"Everyday verbs", sub:"sein, haben, kommen…",
+    items:[
+      {q:"to be", a:"sein", d:["haben","werden","gehen"]},
+      {q:"I am", a:"ich bin", d:["ich habe","ich sei","ich bist"]},
+      {q:"you are (du)", a:"du bist", d:["du bin","du seid","du ist"]},
+      {q:"he is", a:"er ist", d:["er bin","er seid","er hat"]},
+      {q:"to have", a:"haben", d:["sein","halten","holen"]},
+      {q:"I have", a:"ich habe", d:["ich hat","ich bin","ich habst"]},
+      {q:"to go", a:"gehen", d:["kommen","fahren","stehen"]},
+      {q:"to come", a:"kommen", d:["gehen","bleiben","nehmen"]},
+      {q:"to live / reside", a:"wohnen", d:["leben","lieben","wissen"]},
+      {q:"My name is…", a:"Ich heiße…", d:["Ich bin Name","Ich nenne","Ich rufe"]},
+    ]},
+  { id:"a2-1", cefr:"A2", title:"Daily routine", sub:"aufstehen, frühstücken",
+    items:[
+      {q:"to get up", a:"aufstehen", d:["aufstehen bleiben","anstehen","aufwachen nur"]},
+      {q:"to have breakfast", a:"frühstücken", d:["mittagessen","abendessen","kochen"]},
+      {q:"to work", a:"arbeiten", d:["arbeiten gehen","wirken","schaffen nur"]},
+      {q:"to shop", a:"einkaufen", d:["verkaufen","kaufen ein","besorgen nur"]},
+      {q:"I get up at seven.", a:"Ich stehe um sieben auf.", d:["Ich aufstehe um sieben.","Ich stehe auf sieben.","Ich bin sieben auf."]},
+      {q:"usually", a:"normalerweise", d:["manchmal","nie","sofort"]},
+      {q:"sometimes", a:"manchmal", d:["immer","nie","oftmals falsch"]},
+      {q:"never", a:"nie", d:["immer","selten","nein"]},
+      {q:"after work", a:"nach der Arbeit", d:["vor der Arbeit","bei Arbeit","zu Arbeit"]},
+      {q:"I am tired.", a:"Ich bin müde.", d:["Ich habe müde.","Ich bin Traurigkeit.","Ich werde Schlaf."]},
+    ]},
+  { id:"a2-2", cefr:"A2", title:"Travel & town", sub:"Bahnhof, Fahrkarte, links",
+    items:[
+      {q:"the train station", a:"der Bahnhof", d:["die Haltestelle","der Flughafen","die Straße"]},
+      {q:"the ticket", a:"die Fahrkarte", d:["der Fahrplan","die Reise","das Gleis"]},
+      {q:"Where is…?", a:"Wo ist…?", d:["Wer ist…?","Wie ist…?","Wohin sind…?"]},
+      {q:"to the left", a:"links", d:["rechts","geradeaus","oben"]},
+      {q:"to the right", a:"rechts", d:["links","hinten","unten"]},
+      {q:"straight ahead", a:"geradeaus", d:["zurück","seitlich","herum"]},
+      {q:"I would like a ticket.", a:"Ich möchte eine Fahrkarte.", d:["Ich will Ticket.","Ich hätte Fahrkarte.","Ich möchte der Ticket."]},
+      {q:"How much does it cost?", a:"Was kostet das?", d:["Wie teuer bist du?","Was ist Preis?","Wie kosten?"]},
+      {q:"the hotel", a:"das Hotel", d:["der Hotel","die Hotel","dem Hotel"]},
+      {q:"Excuse me", a:"Entschuldigung", d:["Bitte schön","Gern geschehen","Keine Ursache"]},
+    ]},
+  { id:"a2-3", cefr:"A2", title:"Perfect tense", sub:"haben/sein + Partizip",
+    items:[
+      {q:"I have eaten.", a:"Ich habe gegessen.", d:["Ich habe essen.","Ich bin gegessen.","Ich esse gehabt."]},
+      {q:"She has gone.", a:"Sie ist gegangen.", d:["Sie hat gegangen.","Sie ist gehen.","Sie hat geht."]},
+      {q:"past participle of 'sehen'", a:"gesehen", d:["gesieht","gesehnt","sagt"]},
+      {q:"past participle of 'finden'", a:"gefunden", d:["gefundenet","gefindet","fand"]},
+      {q:"We have slept.", a:"Wir haben geschlafen.", d:["Wir sind geschlafen.","Wir haben schlafen.","Wir schlieft."]},
+      {q:"They have come.", a:"Sie sind gekommen.", d:["Sie haben gekommen.","Sie sind kommen.","Sie kamen haben."]},
+      {q:"Did you (du) understand?", a:"Hast du verstanden?", d:["Bist du verstanden?","Hast du verstehen?","Verstehst gehabt?"]},
+      {q:"I was in Berlin.", a:"Ich war in Berlin.", d:["Ich bin gewesen Berlin.","Ich hatte in Berlin.","Ich warde Berlin."]},
+      {q:"yesterday", a:"gestern", d:["heute","morgen","damals nur"]},
+      {q:"already", a:"schon", d:["noch","erst","bald"]},
+    ]},
+  { id:"b1-1", cefr:"B1", title:"Cases in action", sub:"Akkusativ & Dativ",
+    items:[
+      {q:"I see the man. (Acc.)", a:"Ich sehe den Mann.", d:["Ich sehe der Mann.","Ich sehe dem Mann.","Ich sehe des Mannes."]},
+      {q:"I give the woman the book.", a:"Ich gebe der Frau das Buch.", d:["Ich gebe die Frau das Buch.","Ich gebe den Frau das Buch.","Ich gebe des Frau das Buch."]},
+      {q:"with the bus", a:"mit dem Bus", d:["mit den Bus","mit der Bus","mit das Bus"]},
+      {q:"for the child", a:"für das Kind", d:["für dem Kind","für des Kindes","für den Kind"]},
+      {q:"without my friend (m.)", a:"ohne meinen Freund", d:["ohne meinem Freund","ohne mein Freund","ohne meines Freundes"]},
+      {q:"to the doctor (destination)", a:"zum Arzt", d:["zu der Arzt","nach dem Arzt","am Arzt"]},
+      {q:"I am waiting for the train.", a:"Ich warte auf den Zug.", d:["Ich warte auf dem Zug.","Ich warte für den Zug.","Ich warte den Zug."]},
+      {q:"genitive: the child's toy", a:"das Spielzeug des Kindes", d:["das Spielzeug dem Kind","das Spielzeug den Kindes","das Spielzeug der Kind"]},
+      {q:"preposition that takes dative: 'with'", a:"mit", d:["für","ohne","durch"]},
+      {q:"preposition that takes accusative: 'through'", a:"durch", d:["mit","bei","seit"]},
+    ]},
+  { id:"b1-2", cefr:"B1", title:"Opinions & connectors", sub:"obwohl, deshalb, weil",
+    items:[
+      {q:"because (verb to end)", a:"weil", d:["denn","deshalb","obwohl"]},
+      {q:"although", a:"obwohl", d:["weil","trotzdem","aber"]},
+      {q:"therefore (after a period)", a:"deshalb", d:["weil","dass","ob"]},
+      {q:"I think that…", a:"Ich denke, dass…", d:["Ich denke, weil…","Ich denke das…","Ich finde, ob…"]},
+      {q:"In my opinion", a:"Meiner Meinung nach", d:["Meine Meinung nach","Nach ich meine","Ich bin Meinung"]},
+      {q:"on the one hand", a:"einerseits", d:["andererseits nur","trotzdem","zuerst"]},
+      {q:"on the other hand", a:"andererseits", d:["einerseits","deswegen","jedoch nur"]},
+      {q:"however / though", a:"allerdings", d:["unbedingt","sofort","deshalb"]},
+      {q:"so that (purpose)", a:"damit", d:["dass","weil","ob"]},
+      {q:"whether", a:"ob", d:["wenn","als","dass"]},
+    ]},
+  { id:"b1-3", cefr:"B1", title:"Work & plans", sub:"Bewerbung, Zukunft",
+    items:[
+      {q:"the application", a:"die Bewerbung", d:["der Beruf","die Arbeit","das Vorstellungsgespräch"]},
+      {q:"the interview", a:"das Vorstellungsgespräch", d:["die Stelle","der Lebenslauf","die Pause"]},
+      {q:"the CV / resume", a:"der Lebenslauf", d:["die Note","das Zeugnis","der Chef"]},
+      {q:"I would like to apply.", a:"Ich möchte mich bewerben.", d:["Ich will bewerben mich.","Ich möchte bewerben.","Ich bewerbe wollen."]},
+      {q:"experience", a:"die Erfahrung", d:["die Gefahr","das Ereignis","die Übung nur"]},
+      {q:"responsible for", a:"verantwortlich für", d:["zuständig mit","verantwortlich mit","bereit zu nur"]},
+      {q:"In the future I will…", a:"In Zukunft werde ich…", d:["In Zukunft will ich bin…","Zukunft ich werde…","Ich Zukunft werde…"]},
+      {q:"If I had time, I would…", a:"Wenn ich Zeit hätte, würde ich…", d:["Wenn ich Zeit hätte, werde ich…","Ob ich Zeit habe, würde…","Als ich Zeit hätte…"]},
+      {q:"the colleague", a:"der Kollege / die Kollegin", d:["der Chef nur","der Kunde","der Freund Arbeit"]},
+      {q:"full-time", a:"vollzeit", d:["teilzeit nur","ganztaglich falsch","arbeitszeit"]},
+    ]},
+  { id:"b2-1", cefr:"B2", title:"Passive & Konjunktiv II", sub:"werden + Partizip, hätte",
+    items:[
+      {q:"The letter is written.", a:"Der Brief wird geschrieben.", d:["Der Brief ist geschrieben werden.","Der Brief wird schreiben.","Der Brief hat geschrieben."]},
+      {q:"The house was built.", a:"Das Haus wurde gebaut.", d:["Das Haus ist gebaut worden falsch hier","Das Haus war gebaut.","Das Haus wurde bauen."]},
+      {q:"It is said that…", a:"Es wird gesagt, dass…", d:["Man wird sagen, dass…","Es ist gesagt, dass…","Man sagt werden…"]},
+      {q:"I would have time.", a:"Ich hätte Zeit.", d:["Ich würde Zeit haben falsch kürzer","Ich hatte Zeit.","Ich wäre Zeit."]},
+      {q:"I would go.", a:"Ich würde gehen.", d:["Ich werde gehen.","Ich ging würde.","Ich wäre gehen."]},
+      {q:"If I were you", a:"Wenn ich du wäre", d:["Wenn ich du würde","Als ich du bin","Ob ich wäre du"]},
+      {q:"could (polite)", a:"könnte", d:["kann","konnte","können"]},
+      {q:"should (advice)", a:"sollte", d:["soll","musste","dürfte nur"]},
+      {q:"The problem can be solved.", a:"Das Problem kann gelöst werden.", d:["Das Problem kann lösen.","Das Problem wird können gelöst.","Das Problem ist lösen."]},
+      {q:"as if", a:"als ob", d:["als wenn nur","ob als","wie wenn"]},
+    ]},
+  { id:"b2-2", cefr:"B2", title:"Nuance & style", sub:"zwar, keineswegs, hinsichtlich",
+    items:[
+      {q:"admittedly / it is true that", a:"zwar", d:["obwohl","jedoch","nämlich nur"]},
+      {q:"by no means", a:"keineswegs", d:["keinesfalls nur synonym ok wait","durchaus","unbedingt"]},
+      {q:"with regard to", a:"hinsichtlich", d:["während","innerhalb","außerhalb"]},
+      {q:"to consider / contemplate", a:"erwägen", d:["erwarten","erwähnen","erfinden"]},
+      {q:"to claim / maintain", a:"behaupten", d:["bestätigen","bezweifeln","berichten"]},
+      {q:"reliable", a:"zuverlässig", d:["zufrieden","zufällig","zugänglich"]},
+      {q:"significant / considerable", a:"erheblich", d:["erstaunlich nur","endlich","einfach"]},
+      {q:"nevertheless", a:"nichtsdestotrotz", d:["deswegen","infolgedessen","außerdem"]},
+      {q:"to distinguish", a:"unterscheiden", d:["unterschreiben","unternehmen","unterrichten"]},
+      {q:"in contrast to", a:"im Gegensatz zu", d:["im Vergleich mit falsch-ish","im Gegensatz mit","gegen von"]},
+    ]},
+  { id:"c1-1", cefr:"C1", title:"Academic German", sub:"darlegen, zugrunde liegen",
+    items:[
+      {q:"to set out / explain (formal)", a:"darlegen", d:["erzählen","sagen","reden"]},
+      {q:"to be based on", a:"zugrunde liegen", d:["zu Grunde gehen","unterliegen","nachliegen"]},
+      {q:"the hypothesis", a:"die Hypothese", d:["die These nur","der Beweis","die Folge"]},
+      {q:"to call into question", a:"in Frage stellen", d:["eine Frage stellen","nachfragen","anfragen"]},
+      {q:"in so far as", a:"insofern", d:["inzwischen","indem","indessen"]},
+      {q:"to deduce / infer", a:"schlussfolgern", d:["schließen nur Tür","folgern ab","entscheiden"]},
+      {q:"comprehensive", a:"umfassend", d:["umfangreich nur size","vollständig immer","weit"]},
+      {q:"the prerequisite", a:"die Voraussetzung", d:["die Voraussicht","die Ursache","die Absicht"]},
+      {q:"to contribute to", a:"beitragen zu", d:["beitragen für","tragen bei mit","helfen zu"]},
+      {q:"It should be noted that", a:"Es ist festzuhalten, dass", d:["Man muss merken dass","Es wird gehalten dass","Fest ist dass"]},
+    ]},
+  { id:"c1-2", cefr:"C1", title:"Idioms & register", sub:"Redewendungen",
+    items:[
+      {q:"It's raining cats and dogs.", a:"Es regnet in Strömen.", d:["Es regnet Katzen.","Es schüttet Steine.","Es gießt Hunde."]},
+      {q:"to hit the nail on the head", a:"den Nagel auf den Kopf treffen", d:["den Kopf auf den Nagel","ins Schwarze reden","den Punkt schlagen"]},
+      {q:"to take something with a grain of salt", a:"etwas mit Vorsicht genießen", d:["etwas salzen","etwas nicht ernst","etwas bezweifeln nur"]},
+      {q:"That costs an arm and a leg.", a:"Das kostet ein Vermögen.", d:["Das kostet Arm und Bein.","Das ist teuer Bein.","Das schmerzt Geld."]},
+      {q:"to keep one's fingers crossed", a:"jemandem die Daumen drücken", d:["die Finger kreuzen","Glück haben sagen","die Hände reiben"]},
+      {q:"Now you've gone too far.", a:"Jetzt reicht's mir.", d:["Jetzt ist zu weit du.","Das ist über.","Nun stopp weit."]},
+      {q:"to make a mountain out of a molehill", a:"aus einer Mücke einen Elefanten machen", d:["aus Berg einen Hügel","übertreiben Berg","Mücke groß sehen"]},
+      {q:"Mind your own business.", a:"Kümmere dich um deinen eigenen Kram.", d:["Das ist nicht dein.","Halt den Mund Sache.","Dein Ding bleibt."]},
+      {q:"easier said than done", a:"leichter gesagt als getan", d:["einfacher reden als tun","sagen leicht tun schwer","mehr Wort als Tat nur"]},
+      {q:"to get straight to the point", a:"zum Punkt kommen", d:["direkt sprechen Punkt","ohne Umschweife falsch option","Klartext Linie"]},
+    ]},
+  { id:"c2-1", cefr:"C2", title:"Fine distinctions", sub:"scheinbar vs anscheinend",
+    items:[
+      {q:"apparently (from evidence)", a:"anscheinend", d:["scheinbar","offensichtlich falsch twin"," vermeintlich"]},
+      {q:"seemingly (but not really)", a:"scheinbar", d:["anscheinend","offenbar","sichtlich"]},
+      {q:"efficient (little waste)", a:"effizient", d:["effektiv","wirksam nur","ergiebig"]},
+      {q:"effective (gets the result)", a:"effektiv", d:["effizient","fleißig","rasch"]},
+      {q:"to replace X with Y", a:"X durch Y ersetzen", d:["X mit Y ersetzen (umgangssprachlich ok, standard oft durch)","X für Y ersetzen","X gegen Y tauschen immer"]},
+      {q:"while (contrast, formal)", a:"wohingegen", d:["währenddessen","indem","wobei nur"]},
+      {q:"inasmuch as / to the extent that", a:"sofern", d:["soweit nur","sobald","sooft"]},
+      {q:"a subtle difference", a:"ein feiner Unterschied", d:["ein kleiner Fehler","eine Nuance falsch allein","ein leichter Gegensatz"]},
+      {q:"to word something carefully", a:"etwas behutsam formulieren", d:["etwas langsam sagen","vorsichtig sprechen nur","leise schreiben"]},
+      {q:"near-native command", a:"nahezu muttersprachliches Niveau", d:["fast wie Student","gutes Hochdeutsch nur","C1 plus"]},
+    ]},
+  { id:"c2-2", cefr:"C2", title:"Elevated prose", sub:"Stil & Präzision",
+    items:[
+      {q:"to evince / show clearly (formal)", a:"erkennen lassen", d:["zeigen locker","sehen lassen","weisen"]},
+      {q:"the crux of the matter", a:"der Kern der Sache", d:["der Punkt nur","das Problem Herz","die Mitte Thema"]},
+      {q:"not least", a:"nicht zuletzt", d:["nicht zuerst","vor allem falsch twin","zuletzt nicht"]},
+      {q:"to be incumbent upon", a:"obliegen", d:["unterliegen","liegen an","zukommen nur duty mix"]},
+      {q:"for the sake of completeness", a:"der Vollständigkeit halber", d:["für komplett","aus Vollstand","damit vollständig"]},
+      {q:"it remains to be seen", a:"es bleibt abzuwarten", d:["wir müssen sehen","es ist offen nur","man weiß nicht noch"]},
+      {q:"a moot / controversial point", a:"ein strittiger Punkt", d:["ein offener Punkt nur","eine Frage Streit","ein Problem groß"]},
+      {q:"to put it bluntly", a:"um es klar zu sagen", d:["klartext machen","ohne Nettigkeit","direkt Wort"]},
+      {q:"beyond dispute", a:"unbestritten", d:["unbekannt","unbestimmt","unbeachtet"]},
+      {q:"with the benefit of hindsight", a:"im Nachhinein", d:["hinterher schlau","nach der Zeit","später klug"]},
+    ]},
+];
+
+const CEFR_ORDER = ["A1","A2","B1","B2","C1","C2"];
+const STORAGE = "deutschPang.v1";
+const COLORS = [["#ff3b3b","#ff8a8a"],["#3b7bff","#8ab4ff"],["#3bdc6a","#9af0b4"],["#ffb43b","#ffe08a"],["#c03bff","#e0a4ff"]];
+const RAD = [48, 58, 70, 84];
+const BOUNCE = [6.2, 7.0, 7.8, 8.6];
+const PLAYER_SCALE = 1.55;
+
+let audioCtx;
+function ensureAudio() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (audioCtx.state === "suspended") audioCtx.resume();
+}
+function beep(freq, dur, type="sine", vol=0.08) {
+  try {
+    ensureAudio();
+    const o = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    o.type = type; o.frequency.value = freq;
+    g.gain.setValueAtTime(vol, audioCtx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start(); o.stop(audioCtx.currentTime + dur);
+  } catch {}
+}
+function speakGerman(text) {
+  try {
+    if (!window.speechSynthesis) return;
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(String(text));
+    u.lang = "de-DE";
+    u.rate = 0.92;
+    const voices = speechSynthesis.getVoices();
+    const de = voices.find(v => /^de(-|_)/i.test(v.lang)) || voices.find(v => /German|Deutsch/i.test(v.name));
+    if (de) u.voice = de;
+    speechSynthesis.speak(u);
+  } catch {}
+}
+if (window.speechSynthesis) speechSynthesis.onvoiceschanged = () => {};
+
+function loadDB() {
+  try { return JSON.parse(localStorage.getItem(STORAGE)) || null; } catch { return null; }
+}
+function saveDB(db) { localStorage.setItem(STORAGE, JSON.stringify(db)); }
+
+function newUser(name) {
+  return {
+    id: "u" + Date.now() + Math.random().toString(16).slice(2),
+    name: name.slice(0, 24),
+    color: ["#ffd54a","#5ec8ff","#3dd68c","#ff8aa0","#c9a6ff"][Math.floor(Math.random()*5)],
+    xp: 0, streak: 0, lastDay: null, lives: 5,
+    units: {}, // id -> {correct, wrong, completed}
+    created: Date.now()
+  };
+}
+
+let db = loadDB();
+if (!db || !db.users || !db.users.length) {
+  db = { users: [newUser("Player 1")], current: null };
+  db.current = db.users[0].id;
+  saveDB(db);
+}
+function user() { return db.users.find(u => u.id === db.current) || db.users[0]; }
+
+function unitProgress(u, unit) {
+  const rec = (u.units || {})[unit.id] || { correct: 0, wrong: 0, completed: false };
+  return rec;
+}
+function completedCount(u) {
+  return UNITS.filter(un => unitProgress(u, un).completed).length;
+}
+function highestCefr(u) {
+  let best = "A1";
+  for (const un of UNITS) if (unitProgress(u, un).completed) best = un.cefr;
+  return best;
+}
+function accuracy(u) {
+  let c = 0, w = 0;
+  Object.values(u.units || {}).forEach(r => { c += r.correct||0; w += r.wrong||0; });
+  const t = c + w; return t ? Math.round(c / t * 100) : 0;
+}
+function isUnlocked(u, idx) {
+  if (idx === 0) return true;
+  return unitProgress(u, UNITS[idx - 1]).completed;
+}
+
+function refreshHud() {
+  const u = user();
+  document.getElementById("who").textContent = u.name;
+  document.getElementById("xp").textContent = u.xp;
+  document.getElementById("streak").textContent = u.streak;
+  document.getElementById("lives").textContent = u.lives;
+}
+
+function go(id) {
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("on"));
+  document.getElementById(id).classList.add("on");
+  if (id === "home") renderHome();
+  if (id === "board") renderBoard();
+  if (id === "users") renderUsers();
+}
+document.querySelectorAll("[data-go]").forEach(b => b.onclick = () => go(b.dataset.go));
+
+function renderHome() {
+  const u = user();
+  const groups = {};
+  UNITS.forEach((un, i) => {
+    (groups[un.cefr] ||= []).push({ un, i });
+  });
+  let html = `<div class="wrap" style="max-width:1100px">
+    <div class="row"><h2>Your path</h2><span class="chip">${completedCount(u)} / ${UNITS.length} units · ${highestCefr(u)}</span></div>`;
+  for (const cefr of CEFR_ORDER) {
+    html += `<h3 class="lvl-tag" style="margin:16px 0 8px">${cefr}</h3><div class="grid">`;
+    for (const { un, i } of groups[cefr] || []) {
+      const rec = unitProgress(u, un);
+      const lock = !isUnlocked(u, i);
+      const pct = rec.completed ? 100 : Math.min(90, (rec.correct || 0) * 10);
+      html += `<div class="card ${lock ? "lock" : ""}" data-unit="${i}">
+        <div class="lvl-tag">${un.cefr}${rec.completed ? " · DONE" : lock ? " · LOCKED" : ""}</div>
+        <h3>${un.title}</h3>
+        <p>${un.sub}</p>
+        <div class="bar"><i style="width:${lock ? 0 : pct}%"></i></div>
+      </div>`;
+    }
+    html += `</div>`;
+  }
+  html += `</div>`;
+  document.getElementById("home").innerHTML = html;
+  document.querySelectorAll("#home .card").forEach(card => {
+    card.onclick = () => {
+      const i = +card.dataset.unit;
+      if (!isUnlocked(user(), i)) return;
+      startUnit(i);
+    };
+  });
+}
+
+function renderBoard() {
+  const rows = [...db.users].sort((a,b) => b.xp - a.xp);
+  document.getElementById("boardBody").innerHTML = rows.map((u, i) => `<tr>
+    <td>${i+1}</td><td>${escapeHtml(u.name)}${u.id===db.current?" •":""}</td>
+    <td>${u.xp}</td><td>${highestCefr(u)}</td><td>${completedCount(u)}/${UNITS.length}</td>
+    <td>${u.streak}</td><td>${accuracy(u)}%</td>
+  </tr>`).join("") || `<tr><td colspan="7">No players yet</td></tr>`;
+}
+
+function renderUsers() {
+  document.getElementById("userList").innerHTML = db.users.map(u => `
+    <div class="user" data-id="${u.id}">
+      <div class="avatar" style="background:${u.color}">${escapeHtml(u.name[0]||"?").toUpperCase()}</div>
+      <div class="meta"><b>${escapeHtml(u.name)}</b><br><small>${u.xp} XP · ${highestCefr(u)} · streak ${u.streak}</small></div>
+      ${u.id===db.current?"<span class='ok'>active</span>":"<span style='color:#9bb4d0'>switch</span>"}
+    </div>`).join("");
+  document.querySelectorAll("#userList .user").forEach(el => {
+    el.onclick = () => { db.current = el.dataset.id; saveDB(db); refreshHud(); renderUsers(); };
+  });
+}
+
+document.getElementById("addUser").onclick = () => {
+  showModal(`<h1>New player</h1>
+    <input id="nm" type="text" maxlength="24" placeholder="Name" />
+    <button class="solid" id="ok">Create</button>`);
+  document.getElementById("ok").onclick = () => {
+    const n = (document.getElementById("nm").value || "").trim() || "Player";
+    const u = newUser(n);
+    db.users.push(u); db.current = u.id; saveDB(db);
+    hideModal(); refreshHud(); renderUsers();
+  };
+};
+
+document.getElementById("exportBtn").onclick = () => {
+  const payload = JSON.stringify(db);
+  showModal(`<h1>Share progress</h1>
+    <p>Copy this code to another browser, or paste a friend's code to merge players onto this board.</p>
+    <textarea id="blob" style="width:100%;height:120px;background:#0b1422;color:#fff;border:1px solid #2a4060;border-radius:8px;padding:8px">${payload}</textarea>
+    <div style="display:flex;gap:8px;justify-content:center;margin-top:10px">
+      <button class="solid" id="doImp">Import / merge</button>
+      <button class="ghost" id="cls">Close</button>
+    </div>`);
+  document.getElementById("cls").onclick = hideModal;
+  document.getElementById("doImp").onclick = () => {
+    try {
+      const incoming = JSON.parse(document.getElementById("blob").value);
+      if (!incoming.users) throw 0;
+      const ids = new Set(db.users.map(u => u.id));
+      incoming.users.forEach(u => {
+        if (!ids.has(u.id)) db.users.push(u);
+        else {
+          const mine = db.users.find(x => x.id === u.id);
+          if ((u.xp||0) > (mine.xp||0)) Object.assign(mine, u);
+        }
+      });
+      saveDB(db); hideModal(); renderBoard(); refreshHud();
+    } catch { alert("Could not read that save."); }
+  };
+};
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+const modal = document.getElementById("modal");
+function showModal(html) { modal.innerHTML = `<div class="panel">${html}</div>`; modal.classList.add("on"); }
+function hideModal() { modal.classList.remove("on"); modal.innerHTML = ""; }
+
+/* ========== Game engine ========== */
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+const W = canvas.width, H = canvas.height;
+const GROUND = 46, PLAY_H = H - GROUND;
+
+const keys = Object.create(null);
+const touch = { left:false, right:false };
+window.addEventListener("keydown", e => {
+  ensureAudio();
+  keys[e.code] = true;
+  if (["ArrowLeft","ArrowRight","ArrowUp","Space"].includes(e.code)) e.preventDefault();
+  if (e.code === "Space" || e.code === "ArrowUp") tryShoot();
+});
+window.addEventListener("keyup", e => keys[e.code] = false);
+function bindHold(el, flag) {
+  const on = ev => { ev.preventDefault(); touch[flag] = true; if (flag==="fire") tryShoot(); };
+  const off = ev => { ev.preventDefault(); touch[flag] = false; };
+  ["pointerdown"].forEach(t => el.addEventListener(t, on));
+  ["pointerup","pointerleave","pointercancel"].forEach(t => el.addEventListener(t, off));
+}
+bindHold(document.getElementById("btnL"), "left");
+bindHold(document.getElementById("btnR"), "right");
+bindHold(document.getElementById("btnF"), "fire");
+
+let gstate = "idle";
+let player, harpoon, balloons, particles, invuln;
+let currentUnit, queue, promptItem, unitXP, combo, remainingLives;
+
+function bumpStreak() {
+  const u = user();
+  const day = new Date().toISOString().slice(0,10);
+  if (u.lastDay === day) return;
+  const yest = new Date(Date.now() - 864e5).toISOString().slice(0,10);
+  u.streak = u.lastDay === yest ? (u.streak || 0) + 1 : 1;
+  u.lastDay = day;
+}
+
+function startUnit(idx) {
+  currentUnit = UNITS[idx];
+  queue = shuffle(currentUnit.items.slice());
+  unitXP = 0; combo = 0;
+  remainingLives = Math.max(1, user().lives);
+  resetArena();
+  nextPrompt();
+  gstate = "play";
+  go("play");
+  document.getElementById("uxp").textContent = "0";
+}
+
+function resetArena() {
+  player = { x: W/2, y: PLAY_H, vx: 0, facing: 1 };
+  harpoon = null; balloons = []; particles = []; invuln = 50;
+}
+
+function nextPrompt() {
+  if (!queue.length) { finishUnit(true); return; }
+  promptItem = queue.shift();
+  const opts = shuffle([promptItem.a, ...shuffle(promptItem.d).slice(0,2)]).slice(0,3);
+  balloons = opts.map((text, i) => {
+    const size = text.length > 26 ? 3 : text.length > 16 ? 2 : text.length > 8 ? 1 : 0;
+    const gap = (W - 80) / opts.length;
+    return {
+      text, correct: text === promptItem.a,
+      size, r: RAD[size],
+      x: 40 + gap * i + gap/2,
+      y: 90 + (i % 2) * 28,
+      vx: (i % 2 ? 1 : -1) * (1.05 + Math.random()*0.45),
+      vy: -0.6,
+      color: COLORS[i % COLORS.length],
+    };
+  });
+  document.getElementById("prompt").innerHTML =
+    `${escapeHtml(promptItem.q)} <span class="hint">${currentUnit.cefr} · ${escapeHtml(currentUnit.title)} · shoot the German that matches</span>`;
+}
+
+function finishUnit(won) {
+  gstate = "idle";
+  const u = user();
+  const rec = u.units[currentUnit.id] || { correct:0, wrong:0, completed:false };
+  if (won) rec.completed = true;
+  u.units[currentUnit.id] = rec;
+  u.xp += unitXP;
+  if (won) bumpStreak();
+  saveDB(db); refreshHud();
+  showModal(`<h1>${won ? "Unit clear!" : "Out of lives"}</h1>
+    <p>${won ? "Fortschritt gespeichert." : "Practice this unit again."}<br>+${unitXP} XP</p>
+    <button class="solid" id="back">Back to path</button>`);
+  document.getElementById("back").onclick = () => { hideModal(); go("home"); };
+}
+
+document.getElementById("quitBtn").onclick = () => {
+  gstate = "idle"; hideModal(); go("home"); saveDB(db); refreshHud();
+};
+
+function tryShoot() {
+  if (gstate !== "play" || harpoon) return;
+  ensureAudio();
+  beep(520, 0.07, "square", 0.05);
+  harpoon = { x: player.x, y: PLAY_H - 4, top: PLAY_H - 4, speed: 13 };
+}
+
+function spawnPop(x,y,color,n){
+  for(let i=0;i<n;i++){
+    const a=Math.random()*Math.PI*2,s=1.4+Math.random()*3.2;
+    particles.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s-1,life:26+Math.random()*14,max:40,c:color[Math.random()<.5?0:1],r:2+Math.random()*3});
+  }
+}
+
+function markAnswer(ok) {
+  const u = user();
+  const rec = u.units[currentUnit.id] || { correct:0, wrong:0, completed:false };
+  if (ok) {
+    rec.correct++; combo++;
+    const gain = 20 + combo * 4 + currentUnit.cefr.charCodeAt(1);
+    unitXP += gain;
+    document.getElementById("uxp").textContent = unitXP;
+  } else {
+    rec.wrong++; combo = 0;
+    remainingLives--;
+    u.lives = Math.max(0, u.lives); // banked lives stay; session hearts drop
+    document.getElementById("lives").textContent = remainingLives;
+  }
+  u.units[currentUnit.id] = rec;
+  saveDB(db);
+}
+
+function hitWrongOrBody() {
+  if (invuln > 0) return;
+  markAnswer(false);
+  invuln = 70;
+  spawnPop(player.x, player.y-20, ["#fff","#ff6b7a"], 16);
+  if (remainingLives <= 0) finishUnit(false);
+}
+
+function step() {
+  const left = keys.ArrowLeft || keys.KeyA || touch.left;
+  const right = keys.ArrowRight || keys.KeyD || touch.right;
+  player.vx = left && !right ? -4.6 : right && !left ? 4.6 : 0;
+  if (player.vx) player.facing = Math.sign(player.vx);
+  player.x = Math.max(18, Math.min(W-18, player.x + player.vx));
+  if (harpoon) {
+    harpoon.top -= harpoon.speed;
+    if (harpoon.top <= 8) harpoon = null;
+  }
+  const g = 0.15;
+  for (let i = balloons.length-1; i>=0; i--) {
+    const b = balloons[i];
+    b.vy += g; b.x += b.vx; b.y += b.vy;
+    if (b.x-b.r<10){ b.x=10+b.r; b.vx=Math.abs(b.vx); }
+    if (b.x+b.r>W-10){ b.x=W-10-b.r; b.vx=-Math.abs(b.vx); }
+    if (b.y+b.r>PLAY_H){ b.y=PLAY_H-b.r; b.vy=-BOUNCE[b.size]; }
+    if (b.y-b.r<10){ b.y=10+b.r; b.vy=Math.abs(b.vy)*0.35; }
+
+    if (harpoon) {
+      const hx = harpoon.x;
+      const cy = Math.max(harpoon.top, Math.min(PLAY_H, b.y));
+      const dx=b.x-hx, dy=b.y-cy;
+      if (dx*dx+dy*dy <= b.r*b.r && hx>b.x-b.r && hx<b.x+b.r) {
+        harpoon = null;
+        speakGerman(b.text);
+        if (b.correct) {
+          beep(880, 0.12, "sine", 0.09);
+          beep(1170, 0.16, "sine", 0.06);
+          markAnswer(true);
+          spawnPop(b.x,b.y,b.color,18);
+          balloons = [];
+          setTimeout(() => { if (gstate==="play") nextPrompt(); }, 700);
+        } else {
+          beep(180, 0.18, "sawtooth", 0.07);
+          spawnPop(b.x,b.y,["#888","#ccc"],10);
+          balloons.splice(i,1);
+          markAnswer(false);
+          if (remainingLives<=0) finishUnit(false);
+        }
+        continue;
+      }
+    }
+    if (invuln<=0) {
+      const px=player.x, py=player.y-28*PLAYER_SCALE, pr=16*PLAYER_SCALE;
+      const dx=b.x-px, dy=b.y-py;
+      if (dx*dx+dy*dy < (b.r+pr)*(b.r+pr)) hitWrongOrBody();
+    }
+  }
+  if (invuln>0) invuln--;
+  for (let i=particles.length-1;i>=0;i--){
+    const p=particles[i]; p.x+=p.vx; p.y+=p.vy; p.vy+=0.12; p.life--;
+    if(p.life<=0) particles.splice(i,1);
+  }
+}
+
+function draw() {
+  const grd = ctx.createLinearGradient(0,0,0,PLAY_H);
+  grd.addColorStop(0,"#163a66"); grd.addColorStop(1,"#7ec8ef");
+  ctx.fillStyle = grd; ctx.fillRect(0,0,W,PLAY_H);
+  ctx.fillStyle="rgba(255,255,255,.18)";
+  cloud(140,60,1); cloud(480,46,1.2); cloud(800,80,.9);
+
+  (balloons||[]).forEach(drawBalloon);
+  if (harpoon) {
+    ctx.strokeStyle="#fff8d6"; ctx.lineWidth=3;
+    ctx.beginPath(); ctx.moveTo(harpoon.x, PLAY_H-6); ctx.lineTo(harpoon.x, harpoon.top); ctx.stroke();
+    ctx.fillStyle="#ffef8a";
+    ctx.beginPath(); ctx.moveTo(harpoon.x, harpoon.top-2); ctx.lineTo(harpoon.x-6,harpoon.top+10); ctx.lineTo(harpoon.x+6,harpoon.top+10); ctx.fill();
+  }
+  particles.forEach(p=>{
+    ctx.globalAlpha=Math.max(0,p.life/p.max); ctx.fillStyle=p.c;
+    ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fill();
+  });
+  ctx.globalAlpha=1;
+
+  ctx.fillStyle="#5a3a22"; ctx.fillRect(0,PLAY_H,W,GROUND);
+  ctx.fillStyle="#3e8a3a"; ctx.fillRect(0,PLAY_H,W,10);
+
+  if (player) {
+    const blink = invuln>0 && Math.floor(invuln/4)%2===0;
+    if (!blink) drawPlayer();
+  }
+  ctx.fillStyle="#c9b48a";
+  ctx.fillRect(0,0,8,PLAY_H); ctx.fillRect(W-8,0,8,PLAY_H); ctx.fillRect(0,0,W,8);
+}
+
+function cloud(x,y,s){
+  ctx.beginPath();
+  ctx.arc(x,y,22*s,0,Math.PI*2);
+  ctx.arc(x+24*s,y-8*s,28*s,0,Math.PI*2);
+  ctx.arc(x+50*s,y,20*s,0,Math.PI*2);
+  ctx.fill();
+}
+
+function drawBalloon(b){
+  const [c1,c2]=b.color;
+  const g=ctx.createRadialGradient(b.x-b.r*0.35,b.y-b.r*0.4,b.r*0.1,b.x,b.y,b.r);
+  g.addColorStop(0,"#fff"); g.addColorStop(0.2,c2); g.addColorStop(1,c1);
+  ctx.fillStyle=g; ctx.beginPath(); ctx.arc(b.x,b.y,b.r,0,Math.PI*2); ctx.fill();
+  ctx.strokeStyle="rgba(0,0,0,.2)"; ctx.lineWidth=2; ctx.stroke();
+  const fs = b.size>=3 ? 16 : b.size===2 ? 18 : b.size===1 ? 20 : 22;
+  ctx.textAlign="center"; ctx.textBaseline="middle";
+  ctx.lineWidth = 4;
+  ctx.strokeStyle = "rgba(20,24,40,.55)";
+  ctx.fillStyle = "#fff";
+  wrapText(b.text, b.x, b.y, b.r*1.7, fs, true);
+}
+
+function wrapText(text, x, y, maxW, size, stroke) {
+  const words = String(text).split(" ");
+  const lines = [];
+  let line = "";
+  ctx.font = `800 ${size}px Trebuchet MS,sans-serif`;
+  for (const w of words) {
+    const t = line ? line+" "+w : w;
+    if (ctx.measureText(t).width > maxW && line) { lines.push(line); line = w; }
+    else line = t;
+  }
+  if (line) lines.push(line);
+  const h = size + 3;
+  const start = y - ((lines.length-1)*h)/2;
+  lines.forEach((ln,i) => {
+    const yy = start + i*h;
+    if (stroke) ctx.strokeText(ln, x, yy);
+    ctx.fillText(ln, x, yy);
+  });
+}
+
+function drawPlayer(){
+  const x=player.x,y=player.y, s=PLAYER_SCALE;
+  ctx.fillStyle="rgba(0,0,0,.25)";
+  ctx.beginPath(); ctx.ellipse(x,PLAY_H-2,18*s,6*s,0,0,Math.PI*2); ctx.fill();
+  ctx.strokeStyle="#1a1a2a"; ctx.lineWidth=6*s; ctx.lineCap="round";
+  const swing = player.vx ? Math.sin(performance.now()/80)*7 : 0;
+  ctx.beginPath();
+  ctx.moveTo(x-5*s,y-16*s); ctx.lineTo(x-9*s,y-2+swing);
+  ctx.moveTo(x+5*s,y-16*s); ctx.lineTo(x+9*s,y-2-swing); ctx.stroke();
+  ctx.fillStyle="#e24b3b";
+  ctx.fillRect(x-13*s,y-38*s,26*s,24*s);
+  ctx.fillStyle="#f4d35e"; ctx.fillRect(x-13*s,y-18*s,26*s,5*s);
+  ctx.fillStyle="#f3c7a0"; ctx.beginPath(); ctx.arc(x,y-48*s,11*s,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle="#2b6cff"; ctx.beginPath(); ctx.arc(x,y-50*s,12*s,Math.PI,0); ctx.fill();
+  ctx.fillRect(x-12*s,y-50*s,24*s,5*s);
+  ctx.fillStyle="#222";
+  const side=player.facing;
+  ctx.fillRect(x+side*12*s,y-32*s,side*12*s,6*s);
+}
+
+function shuffle(a){ const b=a.slice(); for(let i=b.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [b[i],b[j]]=[b[j],b[i]]; } return b; }
+
+function loop(){
+  if (gstate==="play") step();
+  draw();
+  requestAnimationFrame(loop);
+}
+
+player = { x:W/2, y:PLAY_H, vx:0, facing:1 };
+balloons = []; particles = [];
+refreshHud();
+renderHome();
+requestAnimationFrame(loop);
+
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("service-worker.js").catch(() => {});
+  });
+}
+</script>
+</body>
+</html>

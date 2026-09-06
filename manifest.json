@@ -1,0 +1,16 @@
+{
+  "name": "Deutsch Pang — A1 to C2",
+  "short_name": "Deutsch Pang",
+  "description": "Learn German from A1 to C2 by popping balloons with the right word.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0e1624",
+  "theme_color": "#0e1624",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
