@@ -90,3 +90,10 @@ deutsch-pang/
 ├── icons/                # app icons for the manifest / Play listing
 └── README.md
 ```
+
+## License
+
+© 2026 Javed Ghafoor. All rights reserved. This project is **not** open
+source — no one may copy, modify, or redistribute it without written
+permission. See [LICENSE](LICENSE) for details, or contact
+ghafoorjaved@gmail.com to request permission.
