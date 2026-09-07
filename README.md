@@ -1,11 +1,17 @@
-# Deutsch-PANG — Full Redesign
-A Pang-style German learning arcade game.
+# Deutsch-PANG — Bilingual Edition
 
-## First season
-60 stages: 10 each for A1, A2, B1, B2, C1 and C2.
+A 60-stage Pang-style German learning game.
 
-## Learning
-The game UI is in English. German answers are shown on high-contrast readable balloons. A1/A2/B1 also show the English meaning while playing.
+**Learning loop:** English meaning → shoot the matching German word.
 
-## Deployment
-Upload `index.html`, `manifest.json`, and `service-worker.js` to the repository root for GitHub Pages.
+- German vocabulary is what the player shoots.
+- Interface, instructions, buttons and feedback are in English.
+- The hanging card under each balloon says GERMAN / DEUTSCH.
+- English meaning is shown clearly in the question area.
+- A1, A2 and B1 remain beginner-friendly; higher levels continue to C2.
+- Left: hold/drag joystick to move.
+- Right: FIRE.
+- Balloons are slow, glossy and readable.
+- Background scenery is built into the game.
+
+Upload all files to the root of the GitHub Pages repository.

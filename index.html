@@ -19,15 +19,22 @@ header{height:62px;flex:0 0 62px;display:flex;align-items:center;justify-content
 .info{margin-top:22px;width:min(920px,100%);padding:15px 17px;border-radius:16px;background:#111a2b;border:2px solid #2f3e58;color:#cbd5e5;line-height:1.45;font-size:13px}.info b{color:#fff}
 #game{flex-direction:column;background:#0a0f19}
 #question{height:94px;flex:0 0 94px;padding:10px 12px;background:linear-gradient(#172238,#111a2a);border-bottom:2px solid #41506a;display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;z-index:4}
-.qmain{min-width:0}.qmeta{font-size:12px;color:#aebbd0;font-weight:900;margin-bottom:3px}.qtext{font-size:clamp(17px,4.4vw,23px);font-weight:1000;line-height:1.12;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.meaning{font-size:12px;color:#d7e0ed;margin-top:4px}.meaning b{color:var(--green)}
+.qmain{min-width:0}.qmeta{font-size:12px;color:#aebbd0;font-weight:900;margin-bottom:3px}.qtext{font-size:clamp(17px,4.4vw,23px);font-weight:1000;line-height:1.12;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.meaning{font-size:12px;color:#d7e0ed;margin-top:4px}.bilingualHint{color:#8fe3b0}.meaning b{color:var(--green)}
 #gameArea{position:relative;flex:1;min-height:0;display:flex;align-items:stretch;justify-content:center;overflow:hidden}
 canvas{display:block;width:100%;height:100%;background:#8bbbdc}
-#controls{height:84px;flex:0 0 84px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;padding:10px;background:#0c111c;border-top:2px solid #29364c;z-index:5}
-.ctrl{border:2px solid #42526e;border-radius:15px;background:linear-gradient(#243047,#182235);color:#fff;font-weight:1000;font-size:25px;box-shadow:0 4px 0 #080c14;touch-action:none}.ctrl.fire{background:linear-gradient(#f4cf45,#a97b06);border-color:#ffe47a;color:#201900;font-size:23px}.ctrl:active{transform:translateY(3px);box-shadow:0 1px 0 #080c14}
+#controls{height:104px;flex:0 0 104px;display:flex;align-items:center;justify-content:space-between;padding:8px 24px;background:#0c111c;border-top:2px solid #29364c;z-index:5;gap:20px}
+.joyWrap{width:118px;height:92px;position:relative;display:flex;align-items:center;justify-content:center;touch-action:none}
+.joy{width:78px;height:78px;border-radius:50%;position:relative;background:radial-gradient(circle at 35% 25%,#596b88 0,#33425b 42%,#172236 76%,#0a101a 100%);border:3px solid #71839f;box-shadow:inset 0 5px 10px #fff2,0 5px 0 #060a11,0 8px 15px #0008;touch-action:none}
+.joyBase{position:absolute;inset:12px;border:2px solid #aebbd055;border-radius:50%}
+.joyKnob{position:absolute;left:17px;top:17px;width:42px;height:42px;border-radius:50%;background:radial-gradient(circle at 32% 25%,#fff 0,#e8edf5 20%,#9aa9bf 58%,#53647d 100%);border:2px solid #dce5f1;box-shadow:0 4px 8px #000a,inset 0 2px 5px #fff;transform:translate(0,0)}
+.controlCaption{position:absolute;bottom:-1px;left:0;right:0;text-align:center;color:#aebbd0;font-size:10px;font-weight:1000;letter-spacing:.16em}
+.ctrl{border:2px solid #42526e;border-radius:18px;background:linear-gradient(#243047,#182235);color:#fff;font-weight:1000;font-size:25px;box-shadow:0 4px 0 #080c14;touch-action:none}
+.ctrl.fire{width:155px;height:82px;background:linear-gradient(#ffe36a,#c08a08);border-color:#ffe88b;color:#251d00;font-size:26px;box-shadow:0 5px 0 #735300,0 8px 18px #0008}
+.ctrl:active{transform:translateY(3px);box-shadow:0 1px 0 #080c14}
 #overlay{position:absolute;inset:0;display:none;align-items:center;justify-content:center;background:#07101ad9;z-index:8;padding:20px}.card{width:min(520px,94%);background:linear-gradient(#1b2940,#101827);border:2px solid #526482;border-radius:20px;padding:22px;text-align:center;box-shadow:0 20px 60px #0008}.card h2{margin:0 0 7px;font-size:30px;color:var(--gold)}.card p{color:#c5cfde;line-height:1.45}.bigbtn{border:2px solid #ffe27b;background:var(--gold);color:#231c00;font-weight:1000;border-radius:14px;padding:13px 22px;cursor:pointer;margin:5px}
 #pause{position:absolute;right:10px;top:10px;z-index:6;border:2px solid #556580;background:#111a2bdd;color:#fff;border-radius:12px;padding:7px 10px;font-weight:1000}
 @media(max-width:650px){.levels{grid-template-columns:repeat(2,1fr)}.level{min-height:100px}.logo span{display:none}.pill{font-size:11px;padding:6px 7px}.hero h1{font-size:42px}}
-@media(max-height:650px){header{height:52px;flex-basis:52px}#question{height:78px;flex-basis:78px}.meaning{display:none}#controls{height:70px;flex-basis:70px}}
+@media(max-height:650px){header{height:52px;flex-basis:52px}#question{height:78px;flex-basis:78px}.meaning{display:none}#controls{height:86px;flex-basis:86px;padding:4px 14px}.joyWrap{transform:scale(.86)}.ctrl.fire{height:68px;width:132px}}
 </style>
 </head>
 <body>
@@ -54,7 +61,7 @@ canvas{display:block;width:100%;height:100%;background:#8bbbdc}
   <div id="question">
     <div class="qmain">
       <div class="qmeta" id="qmeta">A1 • München • Stage 1</div>
-      <div class="qtext" id="qtext">Loading…</div>
+      <div class="qtext" id="qtext">Shoot the German word for: Loading…</div>
       <div class="meaning" id="meaning"></div>
     </div>
     <div style="text-align:right">
@@ -68,9 +75,13 @@ canvas{display:block;width:100%;height:100%;background:#8bbbdc}
     <div id="overlay"><div class="card" id="card"></div></div>
   </div>
   <div id="controls">
-    <button class="ctrl" id="left">◀</button>
+    <div class="joyWrap">
+      <div class="joy" id="joystick" aria-label="Move">
+        <div class="joyBase"></div><div class="joyKnob" id="joyKnob"></div>
+      </div>
+      <div class="controlCaption">MOVE</div>
+    </div>
     <button class="ctrl fire" id="fire">FIRE</button>
-    <button class="ctrl" id="right">▶</button>
   </div>
 </section>
 </div>
@@ -123,11 +134,11 @@ function startLevel(id){
 function loadStage(){
  const s=currentStage(), it=currentItem(); questionShown=it.q;
  $("qmeta").textContent=`${s.cefr} • ${s.location} • ${s.landmark}`;
- $("qtext").textContent=it.q;
+ $("qtext").textContent=`Shoot the German word for: ${it.q}`;
  $("stageNo").textContent=s.n;
  $("lives").textContent=lives;
- $("meaning").innerHTML=(s.cefr==="A1"||s.cefr==="A2"||s.cefr==="B1")?`<b>English meaning:</b> ${escapeHtml(it.q)}`:`<span>Advanced German challenge • read the context carefully</span>`;
- player={x:W/2,y:H-46,w:30,h:42,vx:0,speed:260};
+ $("meaning").innerHTML=`<b>English → German:</b> ${escapeHtml(it.q)} <span class="bilingualHint">• Shoot the matching Deutsch word 🎈</span>`;
+ player={x:W/2,y:H-46,w:30,h:42,vx:0,speed:145};
  harpoon=null;particles=[];toast=null;
  // Slow, readable Pang hazards. They are never answer balloons.
  hazards=[];
@@ -137,7 +148,7 @@ function loadStage(){
 }
 function addHazard(x,y,r){
  const dir=Math.random()<.5?-1:1;
- hazards.push({x,y,r,vx:dir*(38+Math.random()*22),vy:35+Math.random()*10,level:0,split:2});
+ hazards.push({x,y,r,vx:dir*(28+Math.random()*14),vy:25+Math.random()*8,level:0,split:2});
 }
 function addSplit(x,y,r,vx){
  hazards.push({x,y,r,vx,vy:20+Math.random()*15,level:1,split:0});
@@ -173,10 +184,12 @@ function shoot(){
 }
 function answerBalloons(){
  const it=currentItem(), answers=[it.a,...it.d];
- const yBase=Math.min(H*.36,230), spread=Math.min(W*.78,answers.length*105);
+ const yBase=Math.min(H*.34,235), spread=Math.min(W*.78,answers.length*108);
+ const colors=["#ef3350","#ffd21f","#18aeea","#35c95b","#ff7a19","#b85cff"];
  return answers.map((label,i)=>{
    const x=W/2-spread/2+i*(spread/Math.max(1,answers.length-1));
-   return {label,x,y:yBase+Math.sin(performance.now()/1400+i)*10,r:Math.min(54,Math.max(40,W/12)),correct:i===0};
+   const phase=performance.now()/3000+i*1.7;
+   return {label,x:x+Math.sin(phase)*7,y:yBase+Math.sin(phase*1.15)*12,r:Math.min(62,Math.max(44,W/11)),correct:i===0,color:colors[(currentStage().n+i)%colors.length]};
  });
 }
 function wrongAnswer(){
@@ -218,7 +231,7 @@ function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":
 function update(dt){
  if(state!=="play"||paused)return;
  if(keys.left)player.x-=player.speed*dt;
- if(keys.right)player.x+=player.speed*dt;
+ if(keys.right)player.x+=player.speed*dt; if(Math.abs(joyX)>.08)player.x+=joyX*player.speed*dt;
  player.x=Math.max(18,Math.min(W-18,player.x));
  if(harpoon){harpoon.y-=harpoon.speed*dt;if(harpoon.y<0)harpoon=null;else shoot()}
  // Hazards: deliberately slow enough to read.
@@ -265,32 +278,58 @@ function drawLandmark(kind,c,base,s){
  if(kind==="park"){ctx.fillStyle="#456c4a";for(let i=-2;i<3;i++){ctx.beginPath();ctx.arc(c+i*65,base-65-(i%2)*20,45,0,7);ctx.fill()}ctx.restore();return}
  ctx.restore();
 }
-function balloon(x,y,r,label,correct){
+function balloon(x,y,r,label,correct,color){
  ctx.save();
- const grad=ctx.createRadialGradient(x-r*.3,y-r*.35,r*.1,x,y,r*1.1);grad.addColorStop(0,correct?"#ffffff":"#f8f9fc");grad.addColorStop(.6,correct?"#dcecff":"#e7edf7");grad.addColorStop(1,correct?"#91a9c8":"#9eabc0");
- ctx.fillStyle=grad;ctx.strokeStyle=correct?"#ffe05c":"#273752";ctx.lineWidth=correct?5:4;
- ctx.beginPath();ctx.ellipse(x,y,r,r*1.08,0,0,Math.PI*2);ctx.fill();ctx.stroke();
- ctx.fillStyle="#fff";ctx.beginPath();ctx.arc(x-r*.35,y-r*.42,r*.16,0,7);ctx.fill();
- ctx.fillStyle="#18243a";ctx.beginPath();ctx.moveTo(x-7,y+r*1.0);ctx.lineTo(x,y+r*1.25);ctx.lineTo(x+7,y+r*1.0);ctx.closePath();ctx.fill();
- // Strong readable label: dark text on a bright, high-contrast capsule.
- const fs=Math.max(12,Math.min(20,r*.33));
- ctx.font=`1000 ${fs}px system-ui`;ctx.textAlign="center";ctx.textBaseline="middle";
- let t=label.length>22?label.slice(0,21)+"…":label;
- const tw=ctx.measureText(t).width+20;
- ctx.fillStyle="#fffdf2";ctx.strokeStyle="#17253c";ctx.lineWidth=3;
- ctx.beginPath();ctx.roundRect(x-tw/2,y-fs*.72,tw,fs*1.44,10);ctx.fill();ctx.stroke();
- ctx.fillStyle="#0b172b";ctx.fillText(t,x,y+1);
+ // Realistic glossy latex balloon.
+ const g=ctx.createRadialGradient(x-r*.34,y-r*.46,r*.04,x,y,r*1.08);
+ g.addColorStop(0,"#ffffff");
+ g.addColorStop(.10,color);
+ g.addColorStop(.55,color);
+ g.addColorStop(.82,"#00000044");
+ g.addColorStop(1,"#00000099");
+ ctx.fillStyle=g;
+ ctx.strokeStyle=correct?"#fff0a8":"#e8edf5";
+ ctx.lineWidth=correct?4:3;
+ ctx.beginPath();ctx.ellipse(x,y,r*.94,r*1.06,0,0,Math.PI*2);ctx.fill();ctx.stroke();
+ // Natural highlight
+ ctx.fillStyle="#ffffffaa";ctx.beginPath();ctx.ellipse(x-r*.34,y-r*.38,r*.16,r*.29,-.35,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle="#ffffff66";ctx.beginPath();ctx.ellipse(x-r*.18,y-r*.15,r*.055,r*.09,-.35,0,Math.PI*2);ctx.fill();
+ // Neck + knot
+ ctx.fillStyle="#00000055";ctx.beginPath();ctx.roundRect(x-5,y+r*.98,10,8,3);ctx.fill();
+ ctx.beginPath();ctx.moveTo(x-7,y+r*1.03);ctx.lineTo(x,y+r*1.18);ctx.lineTo(x+7,y+r*1.03);ctx.closePath();ctx.fill();
+ // String
+ ctx.strokeStyle="#e9edf455";ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(x,y+r*1.16);ctx.lineTo(x+Math.sin(x)*8,Math.min(H-8,y+r*1.55));ctx.stroke();
+ // Hanging readable word card
+ const fs=Math.max(13,Math.min(19,r*.29));
+ ctx.font=`1000 ${fs}px system-ui`;
+ const shown=label.length>20?label.slice(0,19)+"…":label;
+ const tw=Math.max(100,ctx.measureText(shown).width+30), th=fs+30;
+ const cy=y+r*1.58;
+ ctx.fillStyle="#fffdf4";ctx.strokeStyle="#16243a";ctx.lineWidth=2.5;
+ ctx.beginPath();ctx.roundRect(x-tw/2,cy-th/2,tw,th,9);ctx.fill();ctx.stroke();
+ ctx.textAlign="center";ctx.textBaseline="middle";
+ ctx.fillStyle="#65748a";ctx.font=`900 ${Math.max(8,fs*.42)}px system-ui`;ctx.fillText("GERMAN / DEUTSCH",x,cy-fs*.45);
+ ctx.fillStyle="#07162b";ctx.font=`1000 ${fs}px system-ui`;ctx.fillText(shown,x,cy+fs*.18);
+ if(correct){ctx.strokeStyle="#fff1a0";ctx.lineWidth=3;ctx.stroke();}
  ctx.restore();
 }
-function drawAnswers(){answerBalloons().forEach(b=>balloon(b.x,b.y,b.r,b.label,b.correct))}
+function drawAnswers(){answerBalloons().forEach(b=>balloon(b.x,b.y,b.r,b.label,b.correct,b.color))}
 function drawHazards(){hazards.forEach(b=>{ctx.save();ctx.globalAlpha=.96;ctx.fillStyle=b.level?"#d5e1ef":"#e8b5c0";ctx.strokeStyle="#26364e";ctx.lineWidth=4;ctx.beginPath();ctx.arc(b.x,b.y,b.r,0,7);ctx.fill();ctx.stroke();ctx.fillStyle="#fff8";ctx.beginPath();ctx.arc(b.x-b.r*.3,b.y-b.r*.3,b.r*.16,0,7);ctx.fill();ctx.fillStyle="#25334a";ctx.beginPath();ctx.moveTo(b.x-5,b.y+b.r);ctx.lineTo(b.x,b.y+b.r+12);ctx.lineTo(b.x+5,b.y+b.r);ctx.closePath();ctx.fill();ctx.restore()})}
 function drawHarpoon(){if(!harpoon)return;ctx.save();ctx.strokeStyle="#fff";ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(harpoon.x,H-31);ctx.lineTo(harpoon.x,harpoon.y);ctx.stroke();ctx.restore()}
 function drawPlayer(){if(!player)return;ctx.save();if(invuln&&Math.floor(invuln/7)%2===0)ctx.globalAlpha=.35;ctx.fillStyle="#111a2b";ctx.fillRect(player.x-13,H-32,26,8);ctx.fillStyle="#f3c6a2";ctx.beginPath();ctx.arc(player.x,H-62,11,0,7);ctx.fill();ctx.fillStyle="#2870db";ctx.fillRect(player.x-13,H-75,26,10);ctx.fillStyle="#ef4c3c";ctx.fillRect(player.x-13,H-51,26,25);ctx.strokeStyle="#17243a";ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(player.x-6,H-25);ctx.lineTo(player.x-8,H-8);ctx.moveTo(player.x+6,H-25);ctx.lineTo(player.x+8,H-8);ctx.stroke();ctx.restore()}
 function drawParticles(){particles.forEach(p=>{ctx.fillStyle="#ffe06b";ctx.fillRect(p.x,p.y,4,4)})}
 
 function loop(t){const dt=Math.min(.032,(t-last)/1000||.016);last=t;update(dt);draw();raf=requestAnimationFrame(loop)}
-function bindHold(el,key){el.addEventListener("pointerdown",e=>{e.preventDefault();keys[key]=true});["pointerup","pointercancel","pointerleave"].forEach(ev=>el.addEventListener(ev,e=>{e.preventDefault();keys[key]=false}))}
-bindHold($("left"),"left");bindHold($("right"),"right");$("fire").addEventListener("pointerdown",e=>{e.preventDefault();fire()});
+const joystick=$("joystick"), joyKnob=$("joyKnob");
+function setJoy(e){
+ const r=joystick.getBoundingClientRect(), center=r.left+r.width/2, max=24;
+ let dx=Math.max(-max,Math.min(max,e.clientX-center));
+ joyX=dx/max; joyKnob.style.transform=`translate(${dx}px,0)`;
+}
+joystick.addEventListener("pointerdown",e=>{e.preventDefault();joyActive=true;joystick.setPointerCapture?.(e.pointerId);setJoy(e)});
+joystick.addEventListener("pointermove",e=>{if(joyActive){e.preventDefault();setJoy(e)}});
+["pointerup","pointercancel","lostpointercapture"].forEach(ev=>joystick.addEventListener(ev,e=>{joyActive=false;joyX=0;joyKnob.style.transform="translate(0,0)"}));
+$("fire").addEventListener("pointerdown",e=>{e.preventDefault();fire();$("fire").setPointerCapture?.(e.pointerId)});
 addEventListener("keydown",e=>{if(e.key==="ArrowLeft"||e.key==="a")keys.left=true;if(e.key==="ArrowRight"||e.key==="d")keys.right=true;if(e.key===" "||e.key==="ArrowUp")fire();if(e.key==="Escape")pauseGame()});
 addEventListener("keyup",e=>{if(e.key==="ArrowLeft"||e.key==="a")keys.left=false;if(e.key==="ArrowRight"||e.key==="d")keys.right=false});
 
