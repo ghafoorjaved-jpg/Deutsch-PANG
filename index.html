@@ -37,10 +37,86 @@ function fail(){state="idle";save();modal("NO LIVES",`Du warst in ${esc(currentS
 function modal(t,p){const m=document.getElementById("modal");m.style.display="flex";m.innerHTML=`<div class="modalBox"><h2>${t}</h2><p>${p}</p><div class="actions"><button class="btn gold" id="again">NOCHMAL</button><button class="btn" id="stages">STAGES</button></div></div>`;again.onclick=()=>{m.style.display="none";start(currentStage.n)};stages.onclick=()=>{m.style.display="none";openStages(selected)}}
 function mark(ok){let r=db.mastery[qItem.a]||{right:0,wrong:0};if(ok){r.right++;combo++;let g=25+combo*5;stageXP+=g;db.xp+=g;toast("RICHTIG! +"+g)}else{r.wrong++;combo=0;lives--;livesEl();toast("FALSCH!")}db.mastery[qItem.a]=r;save();if(!ok&&lives<=0)fail()}
 function shoot(){if(state!=="play"||harpoon)return;audioOn();beep(520,.05,"square",.035);harpoon={x:player.x,top:PLAY_H-5}}
-function hit(i){let b=balloons[i];harpoon=null;speak(b.text);if(b.correct){mark(true);pop(b.x,b.y);balloons.splice(i,1);bonus=[];setTimeout(()=>{if(state==="play")next()},260)}else{mark(false);pop(b.x,b.y);balloons.splice(i,1);invuln=65}}
-function split(b){if(b.r>25)for(let k=0;k<2;k++)bonus.push({x:b.x+(k?15:-15),y:b.y,vx:k?2.2:-2.2,vy:-4,r:b.r*.48})}
-function move(arr){for(let b of arr){b.vy+=.16;b.x+=b.vx;b.y+=b.vy;if(b.x-b.r<9){b.x=9+b.r;b.vx=Math.abs(b.vx)}if(b.x+b.r>W-9){b.x=W-9-b.r;b.vx=-Math.abs(b.vx)}if(b.y+b.r>PLAY_H){b.y=PLAY_H-b.r;b.vy=-Math.max(4.1,Math.min(8,b.r/8))}if(b.y-b.r<9){b.y=9+b.r;b.vy=Math.abs(b.vy)*.55}}}
-function step(){let l=keys.left,r=keys.right;player.vx=l&&!r?-5.2:r&&!l?5.2:0;if(player.vx)player.facing=Math.sign(player.vx);player.x=Math.max(24,Math.min(W-24,player.x+player.vx));if(harpoon){harpoon.top-=17;if(harpoon.top<5)harpoon=null}move(balloons);move(bonus);if(harpoon)for(let i=balloons.length-1;i>=0;i--){let b=balloons[i];if(Math.abs(b.x-harpoon.x)<b.r&&harpoon.top<b.y+b.r&&harpoon.top>b.y-b.r){hit(i);break}}if(invuln>0)invuln--;for(let b of balloons.concat(bonus))if(invuln<=0&&Math.hypot(b.x-player.x,b.y-(player.y-34))<b.r+17){invuln=75;lives--;livesEl();toast("AUSWEICHEN!");if(lives<=0){fail();return}}particles.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vy+=.13;p.life--});particles=particles.filter(p=>p.life>0)}
+function splitBall(b){
+  if(b.r>24){
+    const nr=Math.max(13,b.r*.48);
+    for(let k=0;k<2;k++) bonus.push({
+      x:b.x+(k?nr:-nr), y:b.y-4,
+      vx:k?2.4:-2.4, vy:-4.8, r:nr,
+      text:b.text, color:b.color
+    });
+  }
+}
+function removeBall(arr,i,b){
+  pop(b.x,b.y);
+  arr.splice(i,1);
+  splitBall(b);
+}
+function hitBall(arr,i){
+  const b=arr[i]; harpoon=null; speak(b.text);
+  if(b.correct){
+    mark(true);
+    removeBall(arr,i,b);
+    // Correct answer clears the challenge. The newly split small balls
+    // remain shootable; once they are cleared, the next stage starts.
+    if(bonus.length===0 && balloons.length===0){
+      setTimeout(()=>{if(state==="play")next()},260);
+    }
+  }else{
+    mark(false);
+    removeBall(arr,i,b);
+    invuln=65;
+  }
+}
+function move(arr){
+  for(let b of arr){
+    b.vy+=.16;b.x+=b.vx;b.y+=b.vy;
+    if(b.x-b.r<9){b.x=9+b.r;b.vx=Math.abs(b.vx)}
+    if(b.x+b.r>W-9){b.x=W-9-b.r;b.vx=-Math.abs(b.vx)}
+    if(b.y+b.r>PLAY_H){b.y=PLAY_H-b.r;b.vy=-Math.max(4.1,Math.min(8,b.r/8))}
+    if(b.y-b.r<9){b.y=9+b.r;b.vy=Math.abs(b.vy)*.55}
+  }
+}
+function step(){
+  let l=keys.left,r=keys.right;
+  player.vx=l&&!r?-5.2:r&&!l?5.2:0;
+  if(player.vx)player.facing=Math.sign(player.vx);
+  player.x=Math.max(24,Math.min(W-24,player.x+player.vx));
+  if(harpoon){harpoon.top-=17;if(harpoon.top<5)harpoon=null}
+  move(balloons);move(bonus);
+  if(harpoon){
+    // Large/target balloons
+    for(let i=balloons.length-1;i>=0;i--){
+      let b=balloons[i];
+      if(Math.abs(b.x-harpoon.x)<b.r&&harpoon.top<b.y+b.r&&harpoon.top>b.y-b.r){
+        hitBall(balloons,i);break;
+      }
+    }
+    // Split balloons are real enemies too: they can be shot and removed.
+    if(harpoon){
+      for(let i=bonus.length-1;i>=0;i--){
+        let b=bonus[i];
+        if(Math.abs(b.x-harpoon.x)<b.r&&harpoon.top<b.y+b.r&&harpoon.top>b.y-b.r){
+          hitBall(bonus,i);break;
+        }
+      }
+    }
+  }
+  if(invuln>0)invuln--;
+  for(let b of balloons.concat(bonus))
+    if(invuln<=0&&Math.hypot(b.x-player.x,b.y-(player.y-34))<b.r+17){
+      invuln=75;lives--;livesEl();toast("AUSWEICHEN!");
+      if(lives<=0){fail();return}
+    }
+  particles.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vy+=.13;p.life--});
+  particles=particles.filter(p=>p.life>0);
+  // When the correct target was the last large balloon, finishing all
+  // split children advances the player to the next stage.
+  if(state==="play"&&balloons.length===0&&bonus.length===0&&!harpoon&&currentStage._correctCleared){
+    currentStage._correctCleared=false;
+    setTimeout(()=>{if(state==="play")next()},260);
+  }
+}
 function draw(){drawBg(currentStage||STAGES[0]);drawGround();bonus.forEach(b=>bubble(b,"#ffdc67",false));balloons.forEach(b=>bubble(b,b.color,true));if(harpoon){ctx.strokeStyle="#fff7d0";ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(harpoon.x,PLAY_H);ctx.lineTo(harpoon.x,harpoon.top);ctx.stroke();ctx.fillStyle="#ffe15a";ctx.beginPath();ctx.moveTo(harpoon.x,harpoon.top-2);ctx.lineTo(harpoon.x-8,harpoon.top+11);ctx.lineTo(harpoon.x+8,harpoon.top+11);ctx.fill()}particles.forEach(p=>{ctx.globalAlpha=p.life/p.max;ctx.fillStyle=p.c;ctx.fillRect(p.x,p.y,p.r,p.r)});ctx.globalAlpha=1;if(player)drawPlayer()}
 const bgImages={}; function bgImage(s){const key=s.n;if(!bgImages[key]){const im=new Image();im.src=`assets/backgrounds/stage-${String(key).padStart(2,"0")}.svg`;bgImages[key]=im;}return bgImages[key]}
 function drawBg(s){const im=bgImage(s);if(im.complete&&im.naturalWidth){ctx.drawImage(im,0,0,W,PLAY_H)}else{let g=ctx.createLinearGradient(0,0,0,PLAY_H);g.addColorStop(0,"#6d9fd0");g.addColorStop(1,"#d9edf1");ctx.fillStyle=g;ctx.fillRect(0,0,W,PLAY_H)}ctx.fillStyle="#0b1018d9";round(18,18,360,72,9);ctx.fill();ctx.font="900 18px system-ui";ctx.fillStyle="#fff";ctx.fillText(`${FLAG} ${s.location}`,34,48);ctx.font="600 12px system-ui";ctx.fillStyle="#d8deea";ctx.fillText(`${s.landmark} · ${s.state}`,34,69);ctx.font="900 11px system-ui";ctx.fillText("DEUTSCHLAND",W-125,32)}
