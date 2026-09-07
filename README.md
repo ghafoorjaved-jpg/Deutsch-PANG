@@ -1,20 +1,7 @@
-# Deutsch-PANG — Target UI Final
+# Deutsch-PANG — Reference Match Final
 
-This build follows the supplied Pang-style reference:
-- dark top HUD
-- German flag / city / landmark
-- blue bordered prompt: “Shoot the German of:”
-- large German answer balloons with white labels
-- Berlin / Brandenburg Gate example on stage 3
-- bottom analog joystick with arrows
-- large red circular rocket FIRE button
-- 60 stages, A1–C2
-- English prompts, German answers
-- correct answer advances
-- wrong answer costs 1 life and warning sound
-- hazard balloons split and remain shootable
-- at exactly 2 lives, a green +3 LIVES bonus appears once
-- rocket/pop/bonus/warning sounds
-- network-first service worker to avoid stale Pages builds
+Target gameplay UI follows the supplied Berlin reference: dark HUD, German flag/city/landmark, blue prompt, large glossy answer balloons with white cards, Pang-style joystick and red rocket FIRE button.
 
-Upload all four files to the repository root.
+Gameplay includes 60 stages A1-C2, English-to-German prompts, slow readable balloons, correct-answer progression, wrong-answer life loss + warning sound, destructible split balloons, rocket/pop sounds, and the 2-lives green +3 LIVES bonus.
+
+This build also removes old cache/service-worker data on page load to reduce stale GitHub Pages versions.
