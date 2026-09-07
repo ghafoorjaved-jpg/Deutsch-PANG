@@ -5,6 +5,6 @@
   "display":"standalone",
   "background_color":"#070b14",
   "theme_color":"#0b1020",
-  "orientation":"landscape",
+  "orientation":"portrait",
   "icons":[]
 }
