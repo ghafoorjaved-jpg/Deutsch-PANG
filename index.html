@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Deutsch Balloons — A1 to C2</title>
+<style>
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;font-family:system-ui,-apple-system,Segoe UI,sans-serif;background:#75c9f2}
+body{touch-action:none}.game{position:relative;width:100%;height:100%;overflow:hidden;background:linear-gradient(#59b7ee 0%,#b9e7fb 62%,#f6fbff 100%)}
+.cloud{position:absolute;width:130px;height:42px;background:#fff8;border-radius:50px;filter:blur(1px)}
+.cloud:before,.cloud:after{content:"";position:absolute;background:#fff;border-radius:50%}.cloud:before{width:60px;height:60px;left:25px;top:-25px}.cloud:after{width:80px;height:80px;right:18px;top:-38px}
+.c1{left:5%;top:12%}.c2{right:7%;top:24%;transform:scale(.8)}.c3{left:35%;top:5%;transform:scale(.55)}
+.hud{position:absolute;z-index:20;top:10px;left:10px;right:10px;display:flex;gap:8px;align-items:center}
+.box{background:#071a2bd9;border:2px solid #48c7f5;color:#fff;border-radius:14px;padding:7px 10px;box-shadow:0 5px 15px #0003}
+.prompt{flex:1;text-align:center;min-width:0}.prompt small{opacity:.8}.prompt strong{display:block;color:#ffd54a;font-size:1.15rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stats{display:flex;gap:6px}.stats .box{font-size:.8rem;font-weight:800}
+.stage{position:absolute;z-index:20;right:10px;top:76px}
+.arena{position:absolute;inset:0;bottom:15%}
+.balloon{position:absolute;width:164px;height:200px;border-radius:50% 50% 48% 48%/58% 58% 42% 42%;display:flex;align-items:center;justify-content:center;box-shadow:inset -25px -30px 45px #0003,inset 18px 22px 32px #fff5,0 12px 25px #0003;animation:bob 2.2s ease-in-out infinite;z-index:5}
+.balloon:before{content:"";position:absolute;left:18%;top:12%;width:30%;height:35%;border-radius:50%;background:radial-gradient(circle at 50% 50%,#fff9,transparent 70%);transform:rotate(-25deg)}
+.balloon:after{content:"";position:absolute;left:50%;bottom:-38px;width:3px;height:42px;background:#ffffff99}
+.knot{position:absolute;bottom:-6px;left:50%;width:16px;height:16px;background:inherit;transform:translateX(-50%) rotate(45deg);z-index:-1}
+.label{position:relative;z-index:2;background:#fffffff2;color:#102538;padding:9px 15px;border-radius:24px;font-size:1rem;font-weight:900;text-align:center;max-width:88%;line-height:1.1;box-shadow:0 4px 9px #0003}
+.red{background:radial-gradient(circle at 35% 25%,#ff8b8b,#ed3947 45%,#a90822)}
+.blue{background:radial-gradient(circle at 35% 25%,#a5e9ff,#38a9e8 45%,#0871b8)}
+.green{background:radial-gradient(circle at 35% 25%,#b9ffb0,#49c75a 45%,#17852d)}
+.yellow{background:radial-gradient(circle at 35% 25%,#fff8a4,#ffd23e 45%,#d79500)}
+.purple{background:radial-gradient(circle at 35% 25%,#e8b9ff,#a84de0 45%,#68149d)}
+@keyframes bob{50%{transform:translateY(-13px) rotate(1deg)}}
+.pop{animation:pop .28s ease forwards!important}@keyframes pop{to{transform:scale(1.35) rotate(8deg);opacity:0}}
+.player{position:absolute;z-index:12;bottom:15%;width:105px;height:145px;transform:translateX(-50%);filter:drop-shadow(0 8px 5px #0004);touch-action:none;cursor:grab}
+.player svg{width:100%;height:100%}.player.drag{cursor:grabbing;transform:translateX(-50%) scale(1.06)}
+.controls{position:absolute;z-index:25;bottom:10px;left:50%;transform:translateX(-50%);display:flex;gap:8px}
+button{border:0;border-radius:13px;padding:10px 14px;font-weight:900;color:#102538;background:#fff;box-shadow:0 4px 12px #0003}
+.ground{position:absolute;bottom:0;left:0;right:0;height:15%;background:linear-gradient(#263b4e,#0d1825)}
+.start{position:absolute;z-index:50;inset:0;background:linear-gradient(135deg,#071526f5,#123e5ff5);display:flex;align-items:center;justify-content:center;padding:20px}
+.card{max-width:680px;width:100%;max-height:94vh;overflow:auto;background:#ffffffef;border-radius:24px;padding:25px;box-shadow:0 20px 50px #0006;color:#102538}
+.card h1{margin:0 0 5px;font-size:clamp(1.8rem,6vw,3rem)}.card h2{margin:15px 0 7px}.levels{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}.level{padding:8px 3px;text-align:center;border-radius:10px;background:#eaf5fb;font-weight:900}.tutorial{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.step{background:#eef7fc;padding:10px;border-radius:12px;font-size:.88rem}.start button{margin-top:15px;width:100%;font-size:1.1rem;background:#ffd54a}
+.hidden{display:none!important}
+@media(max-width:600px){.balloon{width:132px;height:160px}.label{font-size:.8rem;padding:7px 10px}.player{width:86px;height:120px}.levels{grid-template-columns:repeat(3,1fr)}.tutorial{grid-template-columns:1fr}.hud{gap:4px}.box{padding:5px 7px}.prompt strong{font-size:1rem}}
+</style>
+</head>
+<body>
+<div class="game" id="game">
+  <div class="cloud c1"></div><div class="cloud c2"></div><div class="cloud c3"></div>
+  <div class="hud">
+    <div class="box">🇩🇪 <b>Deutsch</b></div>
+    <div class="box prompt"><small>Find the German word for</small><strong id="question">hello</strong></div>
+    <div class="stats"><div class="box">⭐ <span id="score">0</span></div><div class="box">❤️ <span id="lives">3</span></div></div>
+  </div>
+  <div class="box stage" id="stage">Stage 1 · 1/10 · A1</div>
+  <div class="arena" id="arena"></div>
+  <div class="player" id="player" style="left:50%">
+    <svg viewBox="0 0 100 140" aria-label="player"><circle cx="50" cy="27" r="17" fill="#f2c7a5"/><path d="M34 25Q50 3 67 25Q62 12 50 10Q37 12 34 25" fill="#3a2419"/><path d="M30 52Q50 42 70 52L78 112H22Z" fill="#b52558"/><path d="M28 61L10 84L18 91L39 72M72 61L90 84L82 91L61 72" fill="#d23d70"/><path d="M32 111L25 137H42L50 112L58 137H75L68 111" fill="#24384a"/><rect x="39" y="69" width="22" height="43" rx="8" fill="#4e6575"/><path d="M50 67V35" stroke="#ddd" stroke-width="6"/><circle cx="50" cy="32" r="5" fill="#e74c3c"/></svg>
+  </div>
+  <div class="ground"></div>
+  <div class="controls"><button id="fire">🎯 FIRE</button><button id="restart">↻ Restart Stage</button></div>
+
+  <section class="start" id="start">
+    <div class="card">
+      <h1>🎈 Deutsch Balloons</h1>
+      <p><b>500 stages · 5,000 substages · A1 → C2</b></p>
+      <p>Learn German vocabulary by shooting the correct translation. Every stage has 10 substages. Difficulty and vocabulary progress toward C2.</p>
+      <h2>How to play</h2>
+      <div class="tutorial">
+        <div class="step">👆 <b>Move:</b> drag the player left or right with your finger (or use ← →).</div>
+        <div class="step">🎯 <b>Shoot:</b> tap the player / FIRE button to launch a rocket upward.</div>
+        <div class="step">🧠 <b>Learn:</b> pop the balloon with the correct German word to advance.</div>
+      </div>
+      <h2>Levels</h2>
+      <div class="levels"><div class="level">A1<br>1–100</div><div class="level">A2<br>101–200</div><div class="level">B1<br>201–300</div><div class="level">B2<br>301–400</div><div class="level">C1<br>401–450</div><div class="level">C2<br>451–500</div></div>
+      <button id="play">▶ Start Game</button>
+    </div>
+  </section>
+</div>
+<script>
+const vocab=[
+["hello","Hallo"],["goodbye","Auf Wiedersehen"],["please","Bitte"],["thank you","Danke"],["yes","Ja"],["no","Nein"],
+["house","Haus"],["water","Wasser"],["bread","Brot"],["friend","Freund"],["family","Familie"],["school","Schule"],
+["book","Buch"],["table","Tisch"],["chair","Stuhl"],["window","Fenster"],["door","Tür"],["car","Auto"],
+["work","Arbeit"],["today","heute"],["tomorrow","morgen"],["yesterday","gestern"],["beautiful","schön"],["important","wichtig"],
+["question","Frage"],["answer","Antwort"],["beginning","Anfang"],["decision","Entscheidung"],["experience","Erfahrung"],["opportunity","Möglichkeit"],
+["responsibility","Verantwortung"],["environment","Umwelt"],["development","Entwicklung"],["relationship","Beziehung"],["knowledge","Kenntnis"],
+["achievement","Errungenschaft"],["requirement","Voraussetzung"],["circumstance","Umstand"],["perspective","Perspektive"],["sustainable","nachhaltig"],
+["nevertheless","dennoch"],["consideration","Überlegung"],["misunderstanding","Missverständnis"],["implementation","Umsetzung"],["significance","Bedeutung"],
+["ambiguity","Mehrdeutigkeit"],["comprehensive","umfassend"],["inevitable","unvermeidlich"],["conscientious","gewissenhaft"],["subtle","subtil"]
+];
+const colors=["red","blue","green","yellow","purple"];
+let stage=1,sub=1,score=0,lives=3,question="",answer="",balloons=[],playing=false,rocketBusy=false;
+const arena=document.getElementById("arena"), player=document.getElementById("player");
+function level(){return stage<=100?"A1":stage<=200?"A2":stage<=300?"B1":stage<=400?"B2":stage<=450?"C1":"C2"}
+function updateHUD(){document.getElementById("score").textContent=score;document.getElementById("lives").textContent=lives;document.getElementById("stage").textContent=`Stage ${stage} · ${sub}/10 · ${level()}`}
+function pick(){let i=Math.min(vocab.length-1,Math.floor((stage-1)/10)); let base=vocab[i];question=base[0];answer=base[1];document.getElementById("question").textContent=question}
+function spawn(){
+ arena.innerHTML="";balloons=[];pick();
+ let options=[answer];
+ while(options.length<4){let w=vocab[Math.floor(Math.random()*vocab.length)][1];if(!options.includes(w))options.push(w)}
+ options.sort(()=>Math.random()-.5);
+ options.forEach((word,i)=>{let b=document.createElement("div");b.className=`balloon ${colors[i%colors.length]}`;b.style.left=(7+i*22+Math.random()*7)+"%";b.style.top=(17+Math.random()*43)+"%";b.style.animationDelay=(-Math.random()*1.5)+"s";b.dataset.word=word;b.innerHTML=`<span class="label">${word}</span><span class="knot"></span>`;arena.appendChild(b);balloons.push(b)})
+ updateHUD()
+}
+function pop(b){if(!playing||b.classList.contains("pop"))return;b.classList.add("pop");setTimeout(()=>{if(b.dataset.word===answer){score+=100;sub++;if(sub>10){sub=1;stage++;if(stage>500){stage=500;alert("🎉 C2 MASTER! You completed all 500 stages.");playing=false;return}}spawn()}else{lives--;updateHUD();if(lives<=0){alert("Game over — restart the stage and try again.");playing=false}}},260)}
+function fire(){if(!playing||rocketBusy)return;rocketBusy=true;let r=document.createElement("div");r.style.cssText=`position:absolute;width:10px;height:28px;background:linear-gradient(#fff,#f33);border-radius:8px;left:${player.offsetLeft+player.offsetWidth/2-5}px;bottom:15%;z-index:11`;arena.appendChild(r);let y=window.innerHeight*.85;let timer=setInterval(()=>{y-=12;r.style.top=y+"px";let rr=r.getBoundingClientRect();let hit=balloons.find(b=>{if(b.classList.contains("pop"))return false;let x=b.getBoundingClientRect();return rr.left<x.right&&rr.right>x.left&&rr.top<x.bottom&&rr.bottom>x.top});if(hit){clearInterval(timer);r.remove();rocketBusy=false;pop(hit)}else if(y<0){clearInterval(timer);r.remove();rocketBusy=false}},20)}
+let dragging=false;
+function move(x){let rect=document.getElementById("game").getBoundingClientRect();let px=Math.max(45,Math.min(rect.width-45,x-rect.left));player.style.left=px+"px"}
+player.addEventListener("pointerdown",e=>{dragging=true;player.classList.add("drag");player.setPointerCapture(e.pointerId);move(e.clientX)})
+player.addEventListener("pointermove",e=>{if(dragging)move(e.clientX)})
+player.addEventListener("pointerup",e=>{dragging=false;player.classList.remove("drag");fire()})
+document.addEventListener("keydown",e=>{if(e.key==="ArrowLeft")move(player.offsetLeft-30);if(e.key==="ArrowRight")move(player.offsetLeft+player.offsetWidth+30);if(e.code==="Space")fire()})
+document.getElementById("fire").onclick=fire;
+document.getElementById("play").onclick=()=>{document.getElementById("start").classList.add("hidden");playing=true;stage=1;sub=1;score=0;lives=3;spawn()}
+document.getElementById("restart").onclick=()=>{lives=3;playing=true;spawn()}
+</script>
+</body></html>
